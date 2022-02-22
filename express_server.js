@@ -22,15 +22,20 @@ app.get("/urls", (req, res) => {
     const templateVars = { urls: urlDatabase };
     res.render("urls_index", templateVars);
 });
-app.post("/urls", (req, res) => {
-    console.log(req.body);  // Log the POST request body to the console
-    res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  });
+// app.post("/urls", (req, res) => {
+//     console.log(req.body);  // Log the POST request body to the console
+//     res.send("Ok");         // Respond with 'Ok' (we will replace this)
+//   });
 
 app.get("/urls/:shortURL", (req, res) => {
     const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL};
     res.render("urls_show", templateVars);
 });
+app.post("/urls/:shortURL/delete", (req, res) => {
+    const url = req.params.shortURL;
+    delete urlDatabase[url];
+    res.redirect("/urls");
+})
 
 app.get("/u/:shortURL", (req, res) => {
     const longURL = urlDatabase[req.params.shortURL];
