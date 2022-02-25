@@ -1,6 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
-const  { createNewUrl, createUser, authenticateUser, fetchUserInformation, isLoggedIn } = require("./helpers/userHelper");
+const  { updateUrl, createNewUrl, createUser, authenticateUser, fetchUserInformation, isLoggedIn, filterUrlDb } = require("./helpers/userHelper");
 const { userDB, urlDatabase} = require("./data/userData")
 const app = express();
 app.use(cookieParser());
@@ -24,9 +24,13 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-    const user = fetchUserInformation(userDB, req.cookies.user_Id)
-  const templateVars = { urls: urlDatabase, user_Id : user.id, email: user.email };
+  const user = fetchUserInformation(userDB, req.cookies.user_Id)
+  const urlDB = filterUrlDb(urlDatabase, user.id);
   if (isLoggedIn(user)) {
+  
+  console.log(urlDB)
+  const templateVars = { urls: urlDB, user_Id : user.id, email: user.email };
+  // Filter the URL database based on user ID
     res.render("urls_index", templateVars);
   } else {
     res.redirect("/login")
@@ -48,7 +52,7 @@ app.get("/register", (req, res) => {
   const user = fetchUserInformation(userDB, req.cookies.user_Id)
   const templateVars = { user_Id : user.id, email: user.email };
   if (isLoggedIn(user)) {
-    res.redirect("/urls", templateVars);
+    res.redirect("/urls");
   } else {
     res.render("register", templateVars);
   }
@@ -59,7 +63,7 @@ app.get("/login", (req, res) => {
     const user = fetchUserInformation(userDB, req.cookies.user_Id)
     const templateVars = { user_Id : user.id, email: user.email };
     if (isLoggedIn(user)) {
-    res.redirect("/urls", templateVars)
+    res.redirect("/urls")
     } else {
     res.render("login", templateVars);
     }
@@ -72,7 +76,7 @@ app.get("/u/:shortURL", (req, res) => {
   if (isLoggedIn(user)) {
     res.redirect(longURL, templateVars);
   } else {
-      res.redirect("/login")
+    res.redirect("/login")
   }
 });
 
@@ -86,21 +90,28 @@ app.get("/urls.json", (req, res) => {
   } else {
       res.redirect("/login")
   }
-    
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const url = req.params.shortURL;
-  delete urlDatabase[url];
-  res.redirect("/urls");
+  if (isLoggedIn(req.cookies)) {
+    const url = req.params.shortURL;
+    delete urlDatabase[url];
+    res.redirect("/urls");
+  } else {
+    res.redirect("login")
+  }
+
 });
 
-app.post("/urls/:id", (req, res) => {
-  const shortURL = req.params.id;
-  const newURL = req.body.longURL;
-  urlDatabase[shortURL] = newURL;
-  res.redirect("/urls");
+app.post("/urls/:shortURL/update", (req, res) => {
+  if (isLoggedIn(req.cookies)) {
+    const { error, data } = updateUrl(urlDatabase, req.params.shortURL,req.body.longURL, req.cookies.user_Id); 
+    res.redirect("/urls");
+   } else {
+     res.redirect("login")
+   }
 });
+
 
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
@@ -108,7 +119,6 @@ app.post("/login", (req, res) => {
     if (error) {
       return res.status(403).send(error);
     }
-    console.log(data)
     res.cookie("user_Id", data.id);
     return res.redirect("/urls");
   });
@@ -127,25 +137,19 @@ app.post("/urls", (req, res) => {
     } else {
         res.redirect("login")
     }
-    //console.log(req.cookies.user_Id)
-    // if (error) {
-    //   return res.status(400).send(error);
-    //   //return res.redirect("/register");
-    // }
-    // //res.send(data);
-    // console.log(data);
-    // res.cookie("user_id", data.id);
-    // res.redirect("/login");
-  });
+});
 
 app.post("/register", (req, res) => {
-  const { error, data } = createUser(userDB, req.body);
-  if (error) {
-    return res.status(400).send(error);
+  if (isLoggedIn(req.cookies)) {
+    res.redirect("/urls")
+  } else {
+    const { error, data } = createUser(userDB, req.body);
+    if (error) {
+      return res.status(400).send(error);
+    }
+    res.cookie("user_Id", data.id);
+    res.redirect("/urls");
   }
-  console.log(data);
-  res.cookie("user_Id", data.id);
-  res.redirect("/urls");
 });
 
 

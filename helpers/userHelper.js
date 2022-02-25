@@ -1,3 +1,4 @@
+const res = require("express/lib/response");
 
 
 function generateRandomString() {
@@ -10,11 +11,8 @@ const createUser = function(userDB, user) {
   if (email === '' || password === '') {
     return {error: "Email or password can't be empty", data: null}
   }
-  // if (!email || !password) {
-  //   return { error: "email or password is not valid", data: null };
-  // }
-  for (const key in userData) {
-    if (userData[key].email === email) {
+  for (const user of userData) {
+    if (user.email === email) {
       return { error: `account already exists ${email}`, data: null };
     }
   }
@@ -30,9 +28,23 @@ const createNewUrl = function(urlDatabase, longUrl, user_Id) {
     } else {
         const shortURL = generateRandomString();
         urlDatabase[shortURL] = {longURL: longUrl, userID: user_Id}
-        //console.log(urlDatabase)
         return { error: null, data: urlDatabase[shortURL] };
     }
+};
+const updateUrl = function(urlDatabase, shortUrl, longUrl, user_Id) {
+   
+    if (longUrl === '') {
+      return {error: "URL cannot be empty", data: null}
+    }
+
+        if (urlDatabase[shortUrl].userID === user_Id) {
+            urlDatabase[shortUrl] = {longURL: longUrl, userID: user_Id}
+        } else if (urlDatabase[shortUrl].userID !== user_Id) {
+            console.log("UserID doesn't match")
+        }
+
+    return { error: null, data: urlDatabase[shortUrl]};
+    
 };
 
 const authenticateUser = (userDB, email, password) => {
@@ -70,4 +82,14 @@ const authenticateUser = (userDB, email, password) => {
       }
   };
 
-  module.exports = { createNewUrl, fetchUserInformation, authenticateUser, createUser, isLoggedIn };
+  const filterUrlDb = (urlDatabase, userId) => {
+    let urlDB = {};
+    for (const url in urlDatabase) {
+      if (urlDatabase[url].userID === userId) {
+        urlDB[url] = urlDatabase[url];
+      }
+    }
+      return urlDB;
+  };
+
+  module.exports = { filterUrlDb, updateUrl, createNewUrl, fetchUserInformation, authenticateUser, createUser, isLoggedIn };
