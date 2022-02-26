@@ -1,4 +1,5 @@
 const res = require("express/lib/response");
+const bcrypt = require("bcryptjs");
 
 
 function generateRandomString() {
@@ -17,8 +18,12 @@ const createUser = function(userDB, user) {
     }
   }
   const uid = generateRandomString();
-  userDB[uid] = {id: uid, email: email, password: password}
-  return {error: null, data: userDB[uid]}
+  const hashedPassword = bcrypt.hashSync(password, 10);
+    userDB[uid] = {id: uid, email: email, password: hashedPassword};
+    console.log(userDB[uid])
+    return {error: null, data: userDB[uid]}
+  
+
 };
 
 const createNewUrl = function(urlDatabase, longUrl, user_Id) {
@@ -53,11 +58,16 @@ const authenticateUser = (userDB, email, password) => {
         return {error: "Email or Password cannot be empty string"}
     }
     for (const user of userData) {
-        if (user.email === email && user.password === password) {
+      console.log("user: ", password)
+      console.log(user.password)
+        if (user.email === email) {
+          if (bcrypt.hashSync(password, user.password)){
             return { error: null, data: user };
-        }    
+          }            
+        }
     }
-    return { error: "Email or Password not found", data: null };
+    console.log(userDB)
+    return { error: "Email or Password not found", data: null }; 
 };
 
   const fetchUrlInformation = (urlDB, url) => {

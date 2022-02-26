@@ -27,8 +27,7 @@ app.get("/urls", (req, res) => {
   const user = fetchUserInformation(userDB, req.cookies.user_Id)
   const urlDB = filterUrlDb(urlDatabase, user.id);
   if (isLoggedIn(user)) {
-  
-  console.log(urlDB)
+
   const templateVars = { urls: urlDB, user_Id : user.id, email: user.email };
   // Filter the URL database based on user ID
     res.render("urls_index", templateVars);
@@ -72,12 +71,13 @@ app.get("/login", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
     const user = fetchUserInformation(userDB, req.cookies.user_Id)
     const templateVars = { user_Id : user.id, email: user.email };
-  const longURL = urlDatabase[req.params.shortURL];
-  if (isLoggedIn(user)) {
-    res.redirect(longURL, templateVars);
-  } else {
-    res.redirect("/login")
-  }
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+  console.log(longURL)
+  //if (isLoggedIn(user)) {
+    res.redirect(longURL);
+  //} else {
+    //res.redirect("/login")
+  //}
 });
 
 app.get("/", (req, res) => {
