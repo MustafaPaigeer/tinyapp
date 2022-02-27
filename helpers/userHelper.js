@@ -1,4 +1,3 @@
-//const res = require("express/lib/response");
 const bcrypt = require("bcryptjs");
 
 // Create random userID and shortURL
