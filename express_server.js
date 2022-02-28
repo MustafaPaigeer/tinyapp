@@ -14,7 +14,6 @@ app.use(cookieSession({
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
-
 app.get("/urls", (req, res) => {
   const user = fetchUserInformation(userDB, req.session.userId);
   const urlDB = filterUrlDb(urlDatabase, user.id);

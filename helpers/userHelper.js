@@ -5,6 +5,7 @@ const generateRandomString = () => {
   return Math.random().toString(20).substr(2, 6);
 };
 
+// Add new user
 const createUser = (userDB, user) => {
   const { email, password } = user;
   const userData = Object.values(userDB);
@@ -22,6 +23,7 @@ const createUser = (userDB, user) => {
   return {error: null, data: userDB[uid]};
 };
 
+// Add new URL
 const createNewUrl = (urlDatabase, longUrl, userId) => {
   if (!longUrl) {
     return {error: "URL cannot be empty", data: null};
@@ -45,7 +47,7 @@ const updateUrl = (urlDatabase, shortUrl, longUrl, userId) => {
   return { error: null};
 };
 
-
+// authenticate user logins
 const authenticateUser = (userDB, email, password) => {
   const userData = Object.values(userDB);
   if (!email || !password) {
