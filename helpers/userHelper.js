@@ -8,7 +8,7 @@ const generateRandomString = () => {
 const createUser = (userDB, user) => {
   const { email, password } = user;
   const userData = Object.values(userDB);
-  if (email === '' || password === '') {
+  if (!email || !password) {
     return {error: "Email or password can't be empty", data: null};
   }
   for (const user of userData) {
@@ -23,25 +23,26 @@ const createUser = (userDB, user) => {
 };
 
 const createNewUrl = (urlDatabase, longUrl, userId) => {
-  if (longUrl === '') {
+  if (!longUrl) {
     return {error: "URL cannot be empty", data: null};
   } else {
     const shortURL = generateRandomString();
     urlDatabase[shortURL] = {longURL: longUrl, userID: userId};
-    return { error: null, data: urlDatabase[shortURL], shortURL: shortURL };
+    return { error: null, shortURL: shortURL };
   }
 };
 
+// Edit existing URLs
 const updateUrl = (urlDatabase, shortUrl, longUrl, userId) => {
-  if (longUrl === '') {
-    return {error: "URL cannot be empty", data: null};
+  if (!longUrl) {
+    return {error: "URL cannot be empty"};
   }
   if (urlDatabase[shortUrl].userID === userId) {
     urlDatabase[shortUrl] = {longURL: longUrl, userID: userId};
   } else if (urlDatabase[shortUrl].userID !== userId) {
     console.log("UserID doesn't match");
   }
-  return { error: null, data: urlDatabase[shortUrl]};
+  return { error: null};
 };
 
 
@@ -51,7 +52,9 @@ const authenticateUser = (userDB, email, password) => {
     return {error: "Email or Password cannot be empty string"};
   }
   for (const user of userData) {
+    //check if user email matches
     if (user.email === email) {
+      //check if hashed password matches
       if (bcrypt.hashSync(password, user.password)) {
         return { error: null, data: user };
       }
@@ -71,7 +74,7 @@ const fetchUserInformation = (userDB, userId) => {
   return userInfo;
 };
 
-// Check if the user is loge in or not
+// Check if the user is logged in
 const isLoggedIn = (loginToken) => {
   if (Object.keys(loginToken).length === 0) {
     return false;

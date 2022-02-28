@@ -11,7 +11,7 @@
         </div>
       </div>
       <section>
-        <% if(!user_Id){  %>
+        <% if(!userId){  %>
           <div class="navbar-nav">
           <a class="nav-item nav-link" href="/register">Register</a>
           <a class="nav-item nav-link" href="/login">Login</a>
@@ -19,7 +19,7 @@
         </div>
         <% } %>
     
-        <% if(user_Id){ %>
+        <% if(userId){ %>
           <form action="/logout" method="POST">
             <label>Logged in Us: <%= email %></label>
             <button type="submit" class="btn btn-primary">LOGOUT</button>
