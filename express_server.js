@@ -22,7 +22,7 @@ app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDB, user_Id : user.id, email: user.email };
     res.render("urls_index", templateVars);
   } else {
-    res.redirect("/login")
+    res.send("please login firstß")
   }
 });
 
@@ -39,10 +39,20 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const user = fetchUserInformation(userDB, req.session.user_Id)
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user_Id: user.id, email: user.email};
+
   if (isLoggedIn(user)) {
-    res.render("urls_show", templateVars);
+    // Checks if the short URL exists in the URL database
+    if (!urlDatabase[req.params.shortURL]) {
+      res.send(` Short URL " ${req.params.shortURL} " not found`);
+    }
+    // Checks if userID matches the userID of short URL in the URL database
+    if (user.id === urlDatabase[req.params.shortURL].userID) {
+      res.render("urls_show", templateVars);
+    } else {
+      res.send(`Url " ${templateVars.shortURL} " cannot be accessed by user ${templateVars.email} due to user restrictions! `)
+    }
   } else {
-    res.redirect("/login");
+    res.send("Please login first to proceed!");
   }
 });
 
