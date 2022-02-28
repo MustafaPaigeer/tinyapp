@@ -28,7 +28,7 @@ const createNewUrl = (urlDatabase, longUrl, userId) => {
   } else {
     const shortURL = generateRandomString();
     urlDatabase[shortURL] = {longURL: longUrl, userID: userId};
-    return { error: null, data: urlDatabase[shortURL] };
+    return { error: null, data: urlDatabase[shortURL], shortURL: shortURL };
   }
 };
 
@@ -44,9 +44,10 @@ const updateUrl = (urlDatabase, shortUrl, longUrl, userId) => {
   return { error: null, data: urlDatabase[shortUrl]};
 };
 
+
 const authenticateUser = (userDB, email, password) => {
   const userData = Object.values(userDB);
-  if (email === '' || password === '') {
+  if (!email || !password) {
     return {error: "Email or Password cannot be empty string"};
   }
   for (const user of userData) {
@@ -58,7 +59,8 @@ const authenticateUser = (userDB, email, password) => {
   }
   return { error: "Email or Password not found", data: null };
 };
-  
+
+// send the user information based on UserID
 const fetchUserInformation = (userDB, userId) => {
   let userInfo = undefined;
   if (userDB[userId]) {
@@ -69,6 +71,7 @@ const fetchUserInformation = (userDB, userId) => {
   return userInfo;
 };
 
+// Check if the user is loge in or not
 const isLoggedIn = (loginToken) => {
   if (Object.keys(loginToken).length === 0) {
     return false;
@@ -77,6 +80,7 @@ const isLoggedIn = (loginToken) => {
   }
 };
 
+// Filter URLs based on the userID, Each user will access their own URLs
 const filterUrlDb = (urlDatabase, userId) => {
   let urlDB = {};
   for (const url in urlDatabase) {

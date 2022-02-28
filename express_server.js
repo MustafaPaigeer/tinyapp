@@ -132,8 +132,9 @@ app.post("/logout", (req, res) => {
 
 app.post("/urls", (req, res) => {
   if (isLoggedIn(req.session)) {
-    const { error, data } = createNewUrl(urlDatabase, req.body.longURL, req.session.user_Id);
-  res.redirect("/urls");
+    const { error, data, shortURL } = createNewUrl(urlDatabase, req.body.longURL, req.session.user_Id);
+    console.log(data)
+  res.redirect(`/urls/${shortURL}`);
   } else {
     res.redirect("login");
   }
